@@ -1,0 +1,169 @@
+erDiagram
+    TENANTS ||--o{ CUSTOMERS : owns
+    TENANTS ||--o{ SELLERS : owns
+    TENANTS ||--o{ CATEGORIES : owns
+    TENANTS ||--o{ WAREHOUSES : owns
+    CUSTOMERS ||--o{ CUSTOMER_ADDRESSES : has
+    CUSTOMERS ||--o{ ORDERS : places
+    SELLERS ||--o{ PRODUCTS : publishes
+    SELLERS ||--o{ ORDER_ITEMS : sells
+    SELLERS ||--o{ SELLER_PAYOUTS : receives
+    CATEGORIES ||--o{ CATEGORIES : parent_of
+    CATEGORIES ||--o{ PRODUCTS : classifies
+    PRODUCTS ||--o{ PRODUCT_PRICE_HISTORY : priced_by
+    PRODUCTS ||--o{ PRODUCT_VERSION_HISTORY : versioned_by
+    PRODUCTS ||--o{ INVENTORY : stocked_as
+    PRODUCTS ||--o{ ORDER_ITEMS : purchased_as
+    WAREHOUSES ||--o{ INVENTORY : stores
+    WAREHOUSES ||--o{ INVENTORY_MOVEMENTS : records
+    INVENTORY ||--o{ INVENTORY_MOVEMENTS : moves
+    ORDERS ||--o{ ORDER_ITEMS : contains
+    ORDERS ||--o{ PAYMENTS : paid_by
+    ORDERS ||--o{ ORDER_STATUS_HISTORY : changes
+    ORDER_ITEMS ||--o{ RETURNS : can_return
+    DIM_DATE ||--o{ FACT_ORDER_ITEMS : date
+    DIM_CUSTOMER ||--o{ FACT_ORDER_ITEMS : customer
+    DIM_PRODUCT ||--o{ FACT_ORDER_ITEMS : product
+    DIM_SELLER ||--o{ FACT_ORDER_ITEMS : seller
+
+    TENANTS {
+        uuid tenant_id PK
+        varchar tenant_name
+        varchar plan_type
+        varchar status
+    }
+
+    CUSTOMERS {
+        bigint customer_id PK
+        uuid tenant_id FK
+        citext email
+        varchar status
+        timestamptz deleted_at
+    }
+
+    SELLERS {
+        bigint seller_id PK
+        uuid tenant_id FK
+        varchar seller_name
+        numeric commission_rate
+        numeric quality_score
+        varchar status
+    }
+
+    CATEGORIES {
+        bigint category_id PK
+        uuid tenant_id FK
+        bigint parent_category_id FK
+        varchar category_name
+    }
+
+    PRODUCTS {
+        bigint product_id PK
+        uuid tenant_id FK
+        bigint seller_id FK
+        bigint category_id FK
+        varchar sku
+        varchar product_name
+        varchar status
+    }
+
+    PRODUCT_PRICE_HISTORY {
+        bigint product_price_id PK
+        bigint product_id FK
+        numeric price
+        numeric cost_amount
+        timestamptz valid_from
+        timestamptz valid_to
+        boolean is_current
+    }
+
+    WAREHOUSES {
+        bigint warehouse_id PK
+        uuid tenant_id FK
+        varchar warehouse_code
+        varchar city
+        char state_code
+    }
+
+    INVENTORY {
+        bigint inventory_id PK
+        bigint warehouse_id FK
+        bigint product_id FK
+        integer quantity_on_hand
+        integer quantity_reserved
+        integer safety_stock
+    }
+
+    ORDERS {
+        bigint order_id PK
+        uuid tenant_id FK
+        bigint customer_id FK
+        varchar order_number
+        varchar order_status
+        numeric total_amount
+        timestamptz order_date
+    }
+
+    ORDER_ITEMS {
+        bigint order_item_id PK
+        bigint order_id FK
+        bigint product_id FK
+        bigint seller_id FK
+        integer quantity
+        numeric unit_price
+        numeric commission_amount
+    }
+
+    PAYMENTS {
+        bigint payment_id PK
+        bigint order_id FK
+        varchar payment_method
+        varchar payment_status
+        numeric amount
+    }
+
+    RETURNS {
+        bigint return_id PK
+        bigint order_item_id FK
+        varchar return_reason
+        varchar return_status
+        numeric refund_amount
+    }
+
+    SELLER_PAYOUTS {
+        bigint payout_id PK
+        bigint seller_id FK
+        date period_start
+        date period_end
+        numeric net_amount
+    }
+
+    DIM_DATE {
+        integer date_key PK
+        date full_date
+    }
+
+    DIM_CUSTOMER {
+        bigint customer_key PK
+        bigint customer_id
+    }
+
+    DIM_PRODUCT {
+        bigint product_key PK
+        bigint product_id
+    }
+
+    DIM_SELLER {
+        bigint seller_key PK
+        bigint seller_id
+    }
+
+    FACT_ORDER_ITEMS {
+        bigint fact_order_item_id PK
+        integer date_key FK
+        bigint customer_key FK
+        bigint product_key FK
+        bigint seller_key FK
+        numeric net_revenue
+        numeric contribution_margin
+    }
