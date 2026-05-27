@@ -4,7 +4,7 @@ Projeto profissional de banco de dados SQL para portfolio, modelado em PostgreSQ
 
 O objetivo e demonstrar dominio pratico de modelagem relacional, SQL avancado, performance, integridade, automacao, governanca e analise de dados em um cenario que parece empresa real.
 
-![DER do projeto](docs/DER.png)
+![DER do projeto](/DER.png)
 
 ## Tema Escolhido
 
